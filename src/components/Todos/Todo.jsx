@@ -1,35 +1,45 @@
 import TodoList from "./TodoList";
 import TodoForm from "./TodoForm";
 import Button from "../UI/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Todo = () => {
-  const [todos, setTodos] = useState([]);
-  const [allTodos, setAllTodos] = useState([]);
+  const [todos, setTodos] = useState(
+    localStorage.getItem("todos")
+      ? JSON.parse(localStorage.getItem("todos"))
+      : []
+  );
+  const [allTodos, setAllTodos] = useState(
+    localStorage.getItem("allTodos")
+      ? JSON.parse(localStorage.getItem("allTodos"))
+      : []
+  );
   const [editingTodo, setEditingTodo] = useState(null);
-
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+    localStorage.setItem("allTodos", JSON.stringify(allTodos));
+  }, [todos, allTodos]);
   const removeTodo = (id) => {
     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
     setAllTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   };
 
   const toggleComplete = (id) => {
-  const updatedTodos = allTodos.map((todo) =>
-    todo.id === id ? { ...todo, completed: !todo.completed } : todo
-  );
-  setAllTodos(updatedTodos);
-  setTodos(updatedTodos); // Şu anki filtreye göre burayı güncellemek daha mantıklı
-};
-
+    const updatedTodos = allTodos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    setAllTodos(updatedTodos);
+    setTodos(updatedTodos);
+  };
 
   const deleteDoneTasks = () => {
     setTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
-      setAllTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
+    setAllTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
   };
 
   const deleteAllTasks = () => {
     setTodos([]);
-    setAllTodos([]); 
+    setAllTodos([]);
   };
 
   const startEditing = (todo) => {
@@ -37,15 +47,18 @@ const Todo = () => {
   };
 
   const handleSave = (newText) => {
-    if (editingTodo) {
-      setTodos((prevTodos) =>
-        prevTodos.map((todo) =>
-          todo.id === editingTodo.id ? { ...todo, text: newText } : todo
-        )
+  if (editingTodo) {
+    const updated = (prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === editingTodo.id ? { ...todo, text: newText } : todo
       );
-      setEditingTodo(null); // Düzenleme modundan çık
-    }
-  };
+
+    setTodos(updated);
+    setAllTodos(updated);
+    setEditingTodo(null);
+  }
+};
+
   const displayAllTodos = () => {
     setTodos(allTodos); // Tüm listeyi göster
   };
